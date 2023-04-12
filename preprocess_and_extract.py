@@ -55,8 +55,6 @@ features.columns=['Min X', 'Min Y', 'Min Z', 'Min Abs', 'Max X', 'Max Y', 'Max Z
                  'Mean X', 'Mean Y', 'Mean Z', 'Mean Abs', 'Median X', 'Median Y', 'Median Z',
                 'Median Abs', 'Skew X', 'Skew Y', 'Skew Z', 'Skew Abs', 'Label']
 
-print(features)
-
 X = features.iloc[:, 1:-1]
 Y = features.iloc[:, -1]
 flist = features.values.tolist()
