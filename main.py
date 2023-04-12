@@ -24,11 +24,12 @@ datain = h5py.File(infilename, 'r')
 # plt.plot(wdata)
 # plt.show()
 
+features = []
+
 for group in datain.keys():
     print(group)
-    for subgroup in datain.keys():
+    for subgroup in datain[group].keys():
         for dataset in datain[group][subgroup].keys():
-            print(dataset)
             sc = preprocessing.StandardScaler()
             df = pd.DataFrame(np.array(datain[group][subgroup][dataset]))
             df.columns = ['Time', 'Linear acc x', 'Linear acc y', 'Linear acc z', 'Absolute acc']
@@ -39,14 +40,17 @@ for group in datain.keys():
             df_clean = pd.DataFrame(sc.fit_transform(df_clean))
 
             # Feature extraction
-            data_min = df_clean.min()
-            data_max = df_clean.max()
-            data_mean = df_clean.mean()
-            data_median = df_clean.median()
-            data_skew = df_clean.skew()
+            data_out = df_clean.min().tolist()
+            data_out += df_clean.max().tolist()
+            data_out += df_clean.mean().tolist()
+            data_out += df_clean.median().tolist()
+            data_out += df_clean.skew().tolist()
+            data_out += [subgroup]
 
-            features = pd.concat([data_min, data_max, data_mean, data_median, data_skew], axis=1)
-            features.columns = (['Min', 'Max', 'Mean', 'Median', 'Skew'])
-            features.index = (['X', 'Y', 'Z', 'Abs'])
+            features.append(data_out)
 
-            print(features)
+feat = pd.DataFrame(features, columns=['Min X', 'Min Y', 'Min Z', 'Min Abs', 'Max X', 'Max Y', 'Max Z', 'Max Abs',
+                                       'Mean X', 'Mean Y', 'Mean Z', 'Mean Abs', 'Median X', 'Median Y', 'Median Z',
+                                       'Median Abs', 'Skew X', 'Skew Y', 'Skew Z', 'Skew Abs', 'Label'])
+
+print(feat)
