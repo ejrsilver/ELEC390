@@ -19,9 +19,9 @@ for dataset in datain['dataset']['Train'].keys():
     train += np.array(datain['dataset']['Train'][dataset]).tolist()
 
 train_dataset = pd.DataFrame(np.array(train))
-train_dataset.columns=['Min X', 'Min Y', 'Min Z', 'Min Abs', 'Max X', 'Max Y', 'Max Z', 'Max Abs',
-                 'Mean X', 'Mean Y', 'Mean Z', 'Mean Abs', 'Median X', 'Median Y', 'Median Z',
-                'Median Abs', 'Skew X', 'Skew Y', 'Skew Z', 'Skew Abs', 'Label']
+train_dataset.columns = ['Max X', 'Max Y', 'Max Z', 'Max Abs', 'Mean X', 'Mean Y', 'Mean Z', 'Mean Abs',
+                    'Skew X', 'Skew Y', 'Skew Z', 'Skew Abs', 'STD X', 'STD Y', 'STD Z', 'STD Abs',
+                    'Kurt X', 'Kurt Y', 'Kurt Z', 'Kurt Abs', 'Label']
 
 # Import testing data
 test = []
@@ -29,9 +29,9 @@ for dataset in datain['dataset']['Test'].keys():
     test += np.array(datain['dataset']['Test'][dataset]).tolist()
 
 test_dataset = pd.DataFrame(np.array(test))
-test_dataset.columns=['Min X', 'Min Y', 'Min Z', 'Min Abs', 'Max X', 'Max Y', 'Max Z', 'Max Abs',
-                 'Mean X', 'Mean Y', 'Mean Z', 'Mean Abs', 'Median X', 'Median Y', 'Median Z',
-                'Median Abs', 'Skew X', 'Skew Y', 'Skew Z', 'Skew Abs', 'Label']
+test_dataset.columns = ['Max X', 'Max Y', 'Max Z', 'Max Abs', 'Mean X', 'Mean Y', 'Mean Z', 'Mean Abs',
+                    'Skew X', 'Skew Y', 'Skew Z', 'Skew Abs', 'STD X', 'STD Y', 'STD Z', 'STD Abs',
+                    'Kurt X', 'Kurt Y', 'Kurt Z', 'Kurt Abs', 'Label']
 
 # Creating the classifier
 train_X = train_dataset.iloc[:, :-1]
@@ -42,9 +42,7 @@ test_Y = test_dataset.iloc[:, -1].astype('int32')
 sc = StandardScaler()
 l_reg = LogisticRegression(max_iter=10000)
 clf = make_pipeline(StandardScaler(), l_reg)
-pca = PCA(n_components=5)
-train_X = pca.fit_transform(train_X)
-test_X = pca.fit_transform(test_X)
+
 clf.fit(train_X, train_Y)
 Y_pred = clf.predict(test_X)
 

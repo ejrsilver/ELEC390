@@ -41,19 +41,19 @@ for group in datain.keys():
             df_data = df.iloc[:, 1:]
 
             data_max = pd.DataFrame(sc.fit_transform(df_data.rolling(50).max().dropna())).astype('float32')
-            data_min = pd.DataFrame(sc.fit_transform(df_data.rolling(50).min().dropna())).astype('float32')
             data_mean = pd.DataFrame(sc.fit_transform(df_data.rolling(50).mean().dropna())).astype('float32')
-            data_median = pd.DataFrame(sc.fit_transform(df_data.rolling(50).median().dropna())).astype('float32')
             data_skew = pd.DataFrame(sc.fit_transform(df_data.rolling(50).skew().dropna())).astype('float32')
+            data_std = pd.DataFrame(sc.fit_transform(df_data.rolling(50).std().dropna())).astype('float32')
+            data_kurt = pd.DataFrame(sc.fit_transform(df_data.rolling(50).kurt().dropna())).astype('float32')
             # 0 for walking, 1 for jumping
             data_labels = pd.DataFrame([0 if subgroup == 'Walk' else 1] * len(data_max)).astype('int32')
 
-            data_out = pd.concat([data_max, data_min, data_mean, data_median, data_skew, data_labels], axis=1)
+            data_out = pd.concat([data_max, data_mean, data_skew, data_std, data_kurt, data_labels], axis=1)
             features = pd.concat([features, data_out], axis=0)
 
-features.columns=['Min X', 'Min Y', 'Min Z', 'Min Abs', 'Max X', 'Max Y', 'Max Z', 'Max Abs',
-                 'Mean X', 'Mean Y', 'Mean Z', 'Mean Abs', 'Median X', 'Median Y', 'Median Z',
-                'Median Abs', 'Skew X', 'Skew Y', 'Skew Z', 'Skew Abs', 'Label']
+features.columns = ['Max X', 'Max Y', 'Max Z', 'Max Abs', 'Mean X', 'Mean Y', 'Mean Z', 'Mean Abs',
+                    'Skew X', 'Skew Y', 'Skew Z', 'Skew Abs', 'STD X', 'STD Y', 'STD Z', 'STD Abs',
+                    'Kurt X', 'Kurt Y', 'Kurt Z', 'Kurt Abs', 'Label']
 
 X = features.iloc[:, 1:-1]
 Y = features.iloc[:, -1]
