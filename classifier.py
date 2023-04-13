@@ -1,79 +1,161 @@
-import h5py
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-from sklearn.inspection import DecisionBoundaryDisplay
-from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, recall_score, confusion_matrix, ConfusionMatrixDisplay, roc_curve, \
     RocCurveDisplay, roc_auc_score
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.inspection import DecisionBoundaryDisplay
+from sklearn.decomposition import PCA
+import h5py as h5
 
-infilename = 'data.h5'
-datain = h5py.File(infilename, 'r')
 
-# Import training data
-train = []
-for dataset in datain['dataset']['Train'].keys():
-    train += np.array(datain['dataset']['Train'][dataset]).tolist()
+def Classify(model, scaler, df):
 
-train_dataset = pd.DataFrame(np.array(train))
-train_dataset.columns = ['Max X', 'Max Y', 'Max Z', 'Max Abs', 'Mean X', 'Mean Y', 'Mean Z', 'Mean Abs',
-                    'Skew X', 'Skew Y', 'Skew Z', 'Skew Abs', 'STD X', 'STD Y', 'STD Z', 'STD Abs',
-                    'Kurt X', 'Kurt Y', 'Kurt Z', 'Kurt Abs', 'Label']
+    df = df.dropna()
+    myarray = np.array(df)
 
-# Import testing data
-test = []
-for dataset in datain['dataset']['Test'].keys():
-    test += np.array(datain['dataset']['Test'][dataset]).tolist()
+    for i in range(0, len(myarray)):
+        if i == 0:
+            myarray[i][1] = myarray[i][1]
+            myarray[i][2] = myarray[i][2]
+            myarray[i][3] = myarray[i][3]
+        else:
+            myarray[i][1] = (myarray[i][1] + myarray[i - 1][1] + myarray[i - 2][1] + myarray[i - 3][1]) / 4
+            myarray[i][2] = (myarray[i][2] + myarray[i - 1][2] + myarray[i - 2][2] + myarray[i - 3][2]) / 4
+            myarray[i][3] = (myarray[i][3] + myarray[i - 1][3] + myarray[i - 2][3] + myarray[i - 3][3]) / 4
 
-test_dataset = pd.DataFrame(np.array(test))
-test_dataset.columns = ['Max X', 'Max Y', 'Max Z', 'Max Abs', 'Mean X', 'Mean Y', 'Mean Z', 'Mean Abs',
-                    'Skew X', 'Skew Y', 'Skew Z', 'Skew Abs', 'STD X', 'STD Y', 'STD Z', 'STD Abs',
-                    'Kurt X', 'Kurt Y', 'Kurt Z', 'Kurt Abs', 'Label']
+    # Average total acceleration
+    avgAccel = 0
+    for i in range(0, len(myarray)):
+        avgAccel += abs(myarray[i][4] / 500)
 
-# Creating the classifier
-train_X = train_dataset.iloc[:, :-1]
-train_Y = train_dataset.iloc[:, -1].astype('int32')
-test_X = test_dataset.iloc[:, :-1]
-test_Y = test_dataset.iloc[:, -1].astype('int32')
+    # max total acceleration
+    maxAccel = 0
+    for i in range(0, len(myarray)):
+        if abs(myarray[i][4]) > maxAccel:
+            maxAccel = abs(myarray[i][4])
 
-sc = StandardScaler()
-l_reg = LogisticRegression(max_iter=10000)
-clf = make_pipeline(StandardScaler(), l_reg)
+    # Average X acceleration
+    avgXAccel = 0
+    for i in range(0, len(myarray)):
+        avgXAccel += myarray[i][1] / 500
 
-clf.fit(train_X, train_Y)
-Y_pred = clf.predict(test_X)
+    # Average Y acceleration
+    avgYAccel = 0
+    for i in range(0, len(myarray)):
+        avgYAccel += myarray[i][2] / 500
 
-Y_clf_prob = clf.predict_proba(test_X)
-acc = accuracy_score(test_Y, Y_pred)
-recall = recall_score(test_Y, Y_pred)
-cm = confusion_matrix(test_Y, Y_pred)
+    # Average Z acceleration
+    avgZAccel = 0
+    for i in range(0, len(myarray)):
+        avgZAccel += abs(myarray[i][3] / 500)
+    # average time above avg Z acceleration
 
-cm_display = ConfusionMatrixDisplay(cm).plot()
-plt.show()
+    avgZTime = 0
+    timer = False
+    times = 0
+    totalTime = 0
+    for i in range(0, len(myarray)):
+        if abs(myarray[i][3]) >= avgZAccel:
+            if timer == False:
+                timer = True
+                times += 1
+                totalTime += 1
+            else:
+                totalTime += 1
+        else:
+            timer = False
 
-fpr, tpr, _ = roc_curve(test_Y, Y_clf_prob[:, 1], pos_label=clf.classes_[1])
-roc_display = RocCurveDisplay(fpr=fpr, tpr=tpr).plot()
-plt.show()
+    avgZTime = totalTime / times
 
-auc = roc_auc_score(test_Y, Y_clf_prob[:, 1])
-print('y_pred is: ', Y_pred)
-print('Y_clf_prob is: ', Y_clf_prob)
-print('accuracy is: ', acc)
-print('recall is: ', recall)
-print('the AUC is: ', auc)
+    # max Z acceleration
+    maxZAccel = 0
+    for i in range(0, len(myarray)):
+        if abs(myarray[i][3]) > maxZAccel:
+            maxZAccel = abs(myarray[i][3])
 
-# pca_pipe = make_pipeline(StandardScaler(), PCA(n_components=2))
-# X_train_pca = pca_pipe.fit_transform(train_X)
-# X_test_pca = pca_pipe.fit_transform(test_X)
-#
-# clf2 = make_pipeline(StandardScaler(), l_reg)
-# clf2.fit(X_train_pca, train_Y)
-#
-# Y_pred_pca = clf2.predict(X_test_pca)
-# disp = DecisionBoundaryDisplay.from_estimator(clf2, X_train_pca, response_method="predict", xlabel='X1', ylabel='X2', alpha=0.5,)
-#
-# disp.ax_.scatter(X_train_pca[:, 0], X_train_pca[:, 1], c=train_Y)
-# plt.show()
+    # max X acceleration
+    maxXAccel = 0
+    for i in range(0, len(myarray)):
+        if abs(myarray[i][1]) > maxXAccel:
+            maxXAccel = abs(myarray[i][1])
+
+    # max Y acceleration
+    maxYAccel = 0
+    for i in range(0, len(myarray)):
+        if abs(myarray[i][2]) > maxYAccel:
+            maxYAccel = abs(myarray[i][2])
+
+    # average time above avg acceleration
+
+    avgTime = 0
+    timer = False
+    times = 0
+    totalTime = 0
+    for i in range(0, len(myarray)):
+        if abs(myarray[i][4]) >= abs(avgAccel):
+            if timer == False:
+                timer = True
+                times += 1
+                totalTime += 1
+            else:
+                totalTime += 1
+        else:
+            timer = False
+
+    avgTime = totalTime / times
+
+    info = [[avgXAccel, maxXAccel, avgYAccel, maxYAccel, avgZAccel, maxZAccel, avgZTime, avgAccel, maxAccel, avgTime]]
+    df = pd.DataFrame(info)
+    Features = df
+    df.columns = ["avgXAccel", "maxXAccel", "avgYAccel", "maxYAccel", "avgZAccel", "maxZAccel", "avgTimeAboveAvgZ",
+                    "avgAccel", "maxAccel", "avgTimeAboveAvg"]
+
+    df = scaler.transform(df)
+    pred = pd.DataFrame(model.predict(df))
+    final = pd.concat([Features, pred], axis=1)
+    final.columns = ["avgXAccel", "maxXAccel", "avgYAccel", "maxYAccel", "avgZAccel", "maxZAccel", "avgTimeAboveAvgZ",
+                  "avgAccel", "maxAccel", "avgTimeAboveAvg", 'label']
+    return final
+
+
+
+
+
+def train():
+    with h5.File('./project_files.h5', 'r') as hdf:
+        Train = pd.DataFrame(hdf.get('/dataset/train'))
+        Test = pd.DataFrame(hdf.get('/dataset/test'))
+
+    Train = Train.dropna()
+    Test = Test.dropna()
+
+    Train.columns = ["avgXAccel", "maxXAccel", "avgYAccel", "maxYAccel", "avgZAccel", "maxZAccel", "avgTimeAboveAvgZ",
+                     "avgAccel", "maxAccel", "avgTimeAboveAvg", "label"]
+    Test.columns = ["avgXAccel", "maxXAccel", "avgYAccel", "maxYAccel", "avgZAccel", "maxZAccel", "avgTimeAboveAvgZ",
+                    "avgAccel", "maxAccel", "avgTimeAboveAvg", "label"]
+
+    Y_train = Train['label']
+    Y_test = Test['label']
+
+    X_train = Train.iloc[:, :-1]
+    X_test = Test.iloc[:, :-1]
+
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    # Now, similar to the code presented in the lecture slides, train and test your model.
+
+    l_reg = LogisticRegression(max_iter=10000)
+    clf = make_pipeline(StandardScaler(), l_reg)
+
+    clf.fit(X_train, Y_train)
+
+    return clf, scaler
+
+
+
