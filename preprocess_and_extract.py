@@ -40,11 +40,11 @@ for group in datain.keys():
             # Pre-processing and Feature Extraction
             df_data = df.iloc[:, 1:]
 
-            data_max = pd.DataFrame(sc.fit_transform(df_data.rolling(50).max().dropna())).astype('float32')
-            data_mean = pd.DataFrame(sc.fit_transform(df_data.rolling(50).mean().dropna())).astype('float32')
-            data_skew = pd.DataFrame(sc.fit_transform(df_data.rolling(50).skew().dropna())).astype('float32')
-            data_std = pd.DataFrame(sc.fit_transform(df_data.rolling(50).std().dropna())).astype('float32')
-            data_kurt = pd.DataFrame(sc.fit_transform(df_data.rolling(50).kurt().dropna())).astype('float32')
+            data_max = pd.DataFrame(sc.fit_transform(df_data.rolling(125).max().dropna())).astype('float32')
+            data_mean = pd.DataFrame(sc.fit_transform(df_data.rolling(125).mean().dropna())).astype('float32')
+            data_skew = pd.DataFrame(sc.fit_transform(df_data.rolling(125).skew().dropna())).astype('float32')
+            data_std = pd.DataFrame(sc.fit_transform(df_data.rolling(125).std().dropna())).astype('float32')
+            data_kurt = pd.DataFrame(sc.fit_transform(df_data.rolling(125).kurt().dropna())).astype('float32')
             # 0 for walking, 1 for jumping
             data_labels = pd.DataFrame([0 if subgroup == 'Walk' else 1] * len(data_max)).astype('int32')
 
@@ -66,10 +66,10 @@ GTest = dataout.create_group('dataset/Test')
 GTrain = dataout.create_group('dataset/Train')
 
 while i < len(test):
-    GTest.create_dataset(name='test{}'.format(int(i/500)), data=test[i:i+499])
-    i += 500
+    GTest.create_dataset(name='test{}'.format(int(i/375)), data=test[i:i+374])
+    i += 375
 
 i = 0
 while i < len(train):
-    GTrain.create_dataset(name='train{}'.format(int(i/500)), data=train[i:i+499])
-    i += 500
+    GTrain.create_dataset(name='train{}'.format(int(i/375)), data=train[i:i+374])
+    i += 375
