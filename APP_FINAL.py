@@ -163,7 +163,6 @@ class Application:
 
         # Redraw the canvas
         self.canvas.draw()
-        self.count += 1
 
 # Create the main application window
 root = tk.Tk()
