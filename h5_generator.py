@@ -3,7 +3,7 @@ import h5py
 ethan = h5py.File('ethan.h5', 'r')
 jacob = h5py.File('Jacob_Schaffer.h5', 'r')
 lauren = h5py.File('lauren_data.h5', 'r')
-traintest = h5py.File('train_test.h5', 'r')
+traintest = h5py.File('project_files.h5', 'r')
 dataout = h5py.File('data.h5', 'w')
 
 dataout.create_group('Ethan')
@@ -15,9 +15,7 @@ GLW = dataout.create_group('Lauren/Walk')
 dataout.create_group('Jacob')
 GJJ = dataout.create_group('Jacob/Jump')
 GJW = dataout.create_group('Jacob/Walk')
-dataout.create_group('dataset')
-GTrain = dataout.create_group('dataset/Train')
-GTest = dataout.create_group('dataset/Test')
+GD = dataout.create_group('dataset')
 
 # Add Ethan Data
 for dataset in ethan['Jump'].keys():
@@ -38,10 +36,6 @@ for dataset in jacob['Jumping'].keys():
 for dataset in jacob['Walking'].keys():
     GJW.create_dataset(name=dataset, data=jacob['Walking'][dataset])
 
-# Add Train Data
-for dataset in traintest['dataset']['Train'].keys():
-    GTrain.create_dataset(name=dataset, data=traintest['dataset']['Train'][dataset])
-
-# Add Test Data
-for dataset in traintest['dataset']['Test'].keys():
-    GTest.create_dataset(name=dataset, data=traintest['dataset']['Test'][dataset])
+# Add Train and Test Data
+for dataset in traintest['dataset'].keys():
+    GD.create_dataset(name='Test' if (dataset == 'test') else 'Train', data=traintest['dataset'][dataset])

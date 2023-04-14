@@ -18,7 +18,6 @@ for i in range(1, 5):
     ax.plot(wd[:, i], label='Walk')
     ax.set_xlabel('Time (ms)')
     ax.set_ylabel('Acceleration (m/s^2)')
-    ax.set_title('Walk vs Jump: {}'.format('X Axis' if (i == 1) else ('Y Axis' if (i == 2) else ('Z Axis' if (i == 3) else 'Absolute Acceleration'))))
     ax.legend()
     plt.show()
 
@@ -31,7 +30,18 @@ for i in range(1, 5):
     ax.plot(wd[:, i], label='Walk')
     ax.set_xlabel('Time (ms)')
     ax.set_ylabel('Acceleration (m/s^2)')
-    ax.set_title('Walk vs Jump: {}'.format('X Axis' if (i == 1) else ('Y Axis' if (i == 2) else ('Z Axis' if (i == 3) else 'Absolute Acceleration'))))
+    ax.legend()
+    plt.show()
+
+# Walk vs Jump Ethan (messy)
+jd = datain['Ethan']['Jump']['jump2-4']
+wd = datain['Ethan']['Walk']['walk2-4']
+for i in range(1, 5):
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.plot(jd[:, i], label='Jump')
+    ax.plot(wd[:, i], label='Walk')
+    ax.set_xlabel('Time (ms)')
+    ax.set_ylabel('Acceleration (m/s^2)')
     ax.legend()
     plt.show()
 
