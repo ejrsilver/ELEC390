@@ -125,8 +125,8 @@ class Application:
                 "avgAccel", "maxAccel", "avgTimeAboveAvg"]
 
         graph = [final[0,0], final[0,1], final[0,2], final[0,3], final[0,4], final[0,5], final[0,6], final[0,7], final[0,8], final[0,9]]
-        plt.rcParams.update({'font.size': 8})
-        plt.title("Prediction: " + ("Walking" if final[0,10] == 0 else "Jumping"))
+        plt.rcParams.update({'font.size': 7})
+        plt.title("Prediction: " + ("Walking" if final[0,10] == 0 else "Jumping"), fontsize=20)
         plt.bar(sets, graph)
 
         # Redraw the canvas
@@ -157,8 +157,8 @@ class Application:
                 "avgAccel", "maxAccel", "avgTimeAboveAvg"]
 
         graph = [final[0,0], final[0,1], final[0,2], final[0,3], final[0,4], final[0,5], final[0,6], final[0,7], final[0,8], final[0,9]]
-        plt.rcParams.update({'font.size': 8})
-        plt.title("Prediction: " + ("Walking" if final[0,10] == 0 else "Jumping"))
+        plt.rcParams.update({'font.size': 7})
+        plt.title("Prediction: " + ("Walking" if final[0,10] == 0 else "Jumping"), fontsize=20)
         plt.bar(sets, graph)
 
         # Redraw the canvas
